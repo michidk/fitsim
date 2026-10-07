@@ -1,0 +1,31 @@
+# One alias per supported chip. Xtensa chips (esp32, esp32s3) need the `esp` toolchain from
+# `espup` (`cargo +esp esp32s3`); the RISC-V chips build with stable Rust.
+[alias]
+esp32 = "build --release --manifest-path crates/firmware/Cargo.toml --features esp32 --target xtensa-esp32-none-elf -Zbuild-std=core,alloc"
+esp32s3 = "build --release --manifest-path crates/firmware/Cargo.toml --features esp32s3 --target xtensa-esp32s3-none-elf -Zbuild-std=core,alloc"
+esp32c3 = "build --release --manifest-path crates/firmware/Cargo.toml --features esp32c3 --target riscv32imc-unknown-none-elf"
+esp32c6 = "build --release --manifest-path crates/firmware/Cargo.toml --features esp32c6 --target riscv32imac-unknown-none-elf"
+# Build, flash and open the serial monitor.
+run-esp32 = "run --release --manifest-path crates/firmware/Cargo.toml --features esp32 --target xtensa-esp32-none-elf -Zbuild-std=core,alloc"
+run-esp32s3 = "run --release --manifest-path crates/firmware/Cargo.toml --features esp32s3 --target xtensa-esp32s3-none-elf -Zbuild-std=core,alloc"
+run-esp32c3 = "run --release --manifest-path crates/firmware/Cargo.toml --features esp32c3 --target riscv32imc-unknown-none-elf"
+run-esp32c6 = "run --release --manifest-path crates/firmware/Cargo.toml --features esp32c6 --target riscv32imac-unknown-none-elf"
+
+[env]
+ESP_LOG = "info"
+
+[target.xtensa-esp32-none-elf]
+runner = "espflash flash --monitor --chip esp32 --partition-table crates/firmware/partitions.csv"
+rustflags = ["-C", "link-arg=-Tlinkall.x", "-C", "link-arg=-Wl,--no-warn-rwx-segments"]
+
+[target.xtensa-esp32s3-none-elf]
+runner = "espflash flash --monitor --chip esp32s3 --partition-table crates/firmware/partitions.csv"
+rustflags = ["-C", "link-arg=-Tlinkall.x", "-C", "link-arg=-Wl,--no-warn-rwx-segments"]
+
+[target.riscv32imc-unknown-none-elf]
+runner = "espflash flash --monitor --chip esp32c3 --partition-table crates/firmware/partitions.csv"
+rustflags = ["-C", "link-arg=-Tlinkall.x", "-C", "force-frame-pointers"]
+
+[target.riscv32imac-unknown-none-elf]
+runner = "espflash flash --monitor --chip esp32c6 --partition-table crates/firmware/partitions.csv"
+rustflags = ["-C", "link-arg=-Tlinkall.x", "-C", "force-frame-pointers"]

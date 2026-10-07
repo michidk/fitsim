@@ -1,0 +1,16 @@
+[package]
+name = "fitsim-web"
+description = "Embedded, gzip-compressed web frontend and the top-level HTTP router shared by firmware and host server."
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+fitsim-core.workspace = true
+
+[build-dependencies]
+flate2 = "1.1"

@@ -1,0 +1,23 @@
+[package]
+name = "fitsim-host"
+description = "Desktop build of the fitness simulator: the real simulation core and web UI without BLE hardware."
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "fitsim_host"
+path = "src/lib.rs"
+
+[[bin]]
+name = "fitsim-host"
+path = "src/main.rs"
+
+[dependencies]
+fitsim-core = { workspace = true, features = ["std"] }
+fitsim-web.workspace = true
+serde_json = { workspace = true, features = ["std"] }

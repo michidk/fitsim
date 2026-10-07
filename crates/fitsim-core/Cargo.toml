@@ -1,0 +1,22 @@
+[package]
+name = "fitsim-core"
+description = "Hardware-independent core of the BLE fitness simulator: simulation, FTMS/HR/CPS codecs, REST routing, network packets."
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+[features]
+default = []
+# Enables `std` for host tooling and tests; the library itself is `no_std + alloc`.
+std = ["serde/std", "serde_json/std"]
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+libm.workspace = true
+httparse.workspace = true
+sha1_smol.workspace = true

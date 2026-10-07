@@ -1,0 +1,12 @@
+# Build output
+/target/
+/crates/firmware/target/
+
+# Local data of the host simulator and browser-test artifacts
+/.fitsim-data/
+/.playwright/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
