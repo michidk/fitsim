@@ -1,0 +1,23 @@
+[workspace]
+members = ["crates/fitsim-core", "crates/fitsim-web", "crates/fitsim-host"]
+# The firmware is its own workspace (separate Cargo.lock and size-optimised profile, no ESP crates
+# in host builds). Build it with the `cargo esp32c3`-style aliases from `.cargo/config.toml`.
+exclude = ["crates/firmware"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["Michael Lohr <michael@lohr.dev>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/michidk/fitsim"
+rust-version = "1.95"
+
+[workspace.dependencies]
+fitsim-core = { path = "crates/fitsim-core", default-features = false }
+fitsim-web = { path = "crates/fitsim-web" }
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
+libm = "0.2"
+httparse = { version = "1.10", default-features = false }
+sha1_smol = { version = "1.0", default-features = false }

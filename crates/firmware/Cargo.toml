@@ -1,0 +1,86 @@
+[package]
+name = "fitsim-firmware"
+description = "ESP32 firmware for the BLE fitness simulator (Wi-Fi + BLE, bare-metal esp-hal)."
+version = "0.1.0"
+edition = "2024"
+authors = ["Michael Lohr <michael@lohr.dev>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/michidk/fitsim"
+rust-version = "1.95"
+publish = false
+
+# Standalone workspace: keeps the ESP dependency tree and its Cargo.lock out of host builds.
+[workspace]
+
+[[bin]]
+name = "fitness-simulator"
+path = "src/main.rs"
+test = false
+bench = false
+
+[dependencies]
+fitsim-core = { path = "../fitsim-core", default-features = false }
+fitsim-web = { path = "../fitsim-web" }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
+
+esp-hal = { version = "1.2.2", features = ["unstable"] }
+esp-radio = { version = "1.0.0-beta.1", features = ["wifi", "ble", "coex", "unstable", "esp-alloc"] }
+esp-rtos = { version = "0.4.0", features = ["embassy", "esp-radio", "esp-alloc"] }
+esp-alloc = "0.11.0"
+esp-println = { version = "0.18.0", features = ["log-04"] }
+esp-backtrace = { version = "0.20.0", features = ["panic-handler", "println"] }
+esp-bootloader-esp-idf = { version = "0.6.0", features = ["embedded-storage"] }
+esp-storage = { version = "0.10.0", features = ["embedded-storage"] }
+
+embassy-executor = "0.10.0"
+embassy-time = "0.5.1"
+embassy-sync = "0.8.0"
+embassy-futures = "0.1.2"
+embassy-embedded-hal = "0.6.0"
+embassy-net = { version = "0.9.1", features = ["tcp", "udp", "dhcpv4", "dhcpv4-hostname", "medium-ethernet", "multicast"] }
+embedded-io-async = "0.7"
+portable-atomic = "1.11"
+heapless = "0.9"
+embedded-storage = "0.3"
+sequential-storage = "8.0.2"
+trouble-host = { version = "0.8.0", features = ["default-packet-pool-mtu-255", "client-att-table-size-64"] }
+static_cell = "2.1"
+log = "0.4"
+
+[features]
+default = []
+esp32 = [
+    "esp-hal/esp32", "esp-radio/esp32", "esp-rtos/esp32", "esp-alloc/esp32", "esp-println/esp32",
+    "esp-backtrace/esp32", "esp-bootloader-esp-idf/esp32", "esp-storage/esp32",
+]
+esp32s3 = [
+    "esp-hal/esp32s3", "esp-radio/esp32s3", "esp-rtos/esp32s3", "esp-alloc/esp32s3", "esp-println/esp32s3",
+    "esp-backtrace/esp32s3", "esp-bootloader-esp-idf/esp32s3", "esp-storage/esp32s3",
+]
+esp32c3 = [
+    "esp-hal/esp32c3", "esp-radio/esp32c3", "esp-rtos/esp32c3", "esp-alloc/esp32c3", "esp-println/esp32c3",
+    "esp-backtrace/esp32c3", "esp-bootloader-esp-idf/esp32c3", "esp-storage/esp32c3",
+]
+esp32c6 = [
+    "esp-hal/esp32c6", "esp-radio/esp32c6", "esp-rtos/esp32c6", "esp-alloc/esp32c6", "esp-println/esp32c6",
+    "esp-backtrace/esp32c6", "esp-bootloader-esp-idf/esp32c6", "esp-storage/esp32c6",
+]
+
+# Size-optimised everywhere; the radio driver needs at least -O2 (esp-radio's docs), so it gets -O3.
+[profile.dev]
+codegen-units = 1
+debug = 2
+incremental = false
+opt-level = "s"
+
+[profile.release]
+codegen-units = 1
+debug = 2
+lto = "fat"
+opt-level = "s"
+
+[profile.dev.package.esp-radio]
+opt-level = 3
+
+[profile.release.package.esp-radio]
+opt-level = 3
