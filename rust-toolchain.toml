@@ -1,6 +1,6 @@
 # Used for the host crates and the RISC-V chips (ESP32-C3 / C6). The Xtensa chips (ESP32 / S3)
 # need the `esp` toolchain from `espup`; see the README.
 [toolchain]
-channel = "1.98.1"
+channel = "1.99.0"
 components = ["rust-src", "rustfmt", "clippy"]
 targets = ["riscv32imc-unknown-none-elf", "riscv32imac-unknown-none-elf"]
