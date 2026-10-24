@@ -1,0 +1,29 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "semanticCommits": "enabled",
+  "extends": [
+    "github>michidk/workflows//templates/renovate"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": [
+        "cargo"
+      ],
+      "groupName": "All Cargo Dependencies"
+    },
+    {
+      "description": "The esp-* crates, embassy and trouble-host have to move together; never bump them one by one.",
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchPackageNames": [
+        "/^esp-/",
+        "/^embassy-/",
+        "trouble-host",
+        "bt-hci"
+      ],
+      "groupName": "ESP and embassy stack",
+      "automerge": false
+    }
+  ]
+}
