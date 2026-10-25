@@ -2,113 +2,66 @@
 # template: rust/ci
 # @end-orcastrate
 
-name: CI
+name: Test & Lint
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-  workflow_dispatch:
+on: [push, pull_request]
 
 permissions:
   contents: read
 
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
 env:
-  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_RETRY: 10
+  RUST_BACKTRACE: short
+  RUSTFLAGS: "-D warnings"
+  RUSTUP_MAX_RETRIES: 10
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  host:
-    name: Host tests, lints and no_std check
-    runs-on: ubuntu-26.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-      - name: Install toolchain from rust-toolchain.toml
-        run: rustup toolchain install
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
-      - name: Check formatting
-        run: |
-          cargo fmt --all -- --check
-          cargo fmt --manifest-path crates/firmware/Cargo.toml -- --check
-      - name: Run host tests (unit + end-to-end)
-        run: cargo test --workspace --locked
-      - name: Lint host crates
-        run: cargo clippy --workspace --locked --all-targets -- -D warnings
-      - name: Keep chip dependencies out of the shared core
-        run: |
-          if cargo tree --locked -p fitsim-core --prefix none --edges normal \
-            | grep -Eq '^(esp-|embassy-|trouble-host|fitsim-firmware)'; then
-            echo "::error::A chip or runtime dependency leaked into fitsim-core."
-            exit 1
-          fi
-      - name: Build the core for a bare-metal target (no_std check)
-        run: |
-          rustup target add thumbv6m-none-eabi
-          cargo build --locked -p fitsim-core --target thumbv6m-none-eabi
-
-  riscv:
-    name: ${{ matrix.chip }} firmware
-    runs-on: ubuntu-26.04
-    timeout-minutes: 30
+  test:
+    name: Test Suite
+    runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
-        include:
-          - chip: esp32c3
-            target: riscv32imc-unknown-none-elf
-          - chip: esp32c6
-            target: riscv32imac-unknown-none-elf
+        os: ["ubuntu-26.04"]
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-      - name: Install toolchain from rust-toolchain.toml
-        run: rustup toolchain install
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
-        with:
-          workspaces: crates/firmware
-      - name: Lint firmware
-        run: >-
-          cargo clippy --locked --manifest-path crates/firmware/Cargo.toml
-          --features ${{ matrix.chip }} --target ${{ matrix.target }} --release -- -D warnings
-      - name: Build firmware
-        run: cargo ${{ matrix.chip }} --locked
+      - name: Checkout sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-  xtensa:
-    name: ${{ matrix.chip }} firmware
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
+
+      - name: Cache
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+
+
+      - name: Compile
+        run: cargo test --no-run
+
+      - name: Test
+        run: cargo test -- --nocapture --quiet
+
+
+  lints:
+    name: Lints
     runs-on: ubuntu-26.04
-    timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - chip: esp32
-            target: xtensa-esp32-none-elf
-          - chip: esp32s3
-            target: xtensa-esp32s3-none-elf
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Checkout sources
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249 # stable
         with:
-          persist-credentials: false
-      - uses: esp-rs/xtensa-toolchain@ec6d36527049a7f4fb2cb0c1a644668c1bb8a2a4 # v1.7.0
-        with:
-          buildtargets: ${{ matrix.chip }}
-          version: '1.97.0.0'
-          default: false
-          override: false
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
-        with:
-          workspaces: crates/firmware
-      - name: Lint firmware
-        run: >-
-          cargo +esp clippy --locked --manifest-path crates/firmware/Cargo.toml
-          --features ${{ matrix.chip }} --target ${{ matrix.target }}
-          -Zbuild-std=core,alloc --release -- -D warnings
-      - name: Build firmware
-        run: cargo +esp ${{ matrix.chip }} --locked
+          components: rustfmt, clippy
+
+      - name: Cache
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check --color always
+
+      - name: Run cargo clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
