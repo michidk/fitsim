@@ -1,3 +1,7 @@
+# @orcastrate
+# template: rust/ci
+# @end-orcastrate
+
 name: CI
 
 on:
