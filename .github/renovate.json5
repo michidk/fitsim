@@ -2,7 +2,11 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "semanticCommits": "enabled",
   "extends": [
-    "github>michidk/workflows//templates/presets/renovate"
+    "github>michidk/workflows//templates/presets/renovate",
+    ":enableVulnerabilityAlertsWithLabel('security')"
+  ],
+  "labels": [
+    "bot"
   ],
   "packageRules": [
     {
