@@ -4,7 +4,9 @@ A desk-sized **BLE fitness test bench**. An ESP32 pretends to be a smart trainer
 
 Open `http://fitness-simulator.local`, move a slider, and the value changes on the BLE link a moment later. See exactly what the app asks the trainer to do.
 
-![Dashboard with an app connected in ERG mode at 250 W](.github/dashboard.png)
+[Try it without hardware](#try-it-without-hardware) · [Build and flash](#build-and-flash) · [Wi-Fi setup](#wi-fi-setup) · [REST API](#rest-api) · [Known limitations](#known-limitations)
+
+<img src=".github/dashboard.png" alt="Dashboard with an app connected in ERG mode at 250 W" width="800">
 
 > **Status.** The simulation core, REST/WebSocket API, web UI and network protocol code are covered by over 100 unit and end-to-end tests and run identically on your desktop (`fitsim-host`). The firmware builds, lints and links for ESP32, ESP32-S3, ESP32-C3 and ESP32-C6.
 
